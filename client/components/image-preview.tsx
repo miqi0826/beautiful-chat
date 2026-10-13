@@ -3,6 +3,7 @@ import { View, Text, Pressable, Image, StyleSheet } from "react-native";
 import { Glyph } from "./glyph";
 import { radius } from "./theme-tokens";
 import type { ExtendedThemeTokens } from "./theme-tokens";
+import { createStyles } from "./type-scale";
 import { unselectable } from "./selection";
 import type { ImageFile } from "../image-file";
 
@@ -42,7 +43,7 @@ export function ImagePreview({ path, file, tokens, onReveal }: ImagePreviewProps
 
   const styles = useMemo(
     () =>
-      StyleSheet.create({
+      createStyles(tokens.fontScale, {
         container: {
           borderRadius: radius.block,
           borderWidth: 1,

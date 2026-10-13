@@ -6,6 +6,7 @@ import { surfaceProps } from "./view-props";
 import { glowing } from "./glow";
 import { Pop } from "./motion";
 import { radius, type ExtendedThemeTokens } from "./theme-tokens";
+import { createStyles } from "./type-scale";
 import { FileTypeLogo, detectFileType } from "./file-type-logo";
 import { selectableSurface, unselectable } from "./selection";
 import { selectionCodeSurface, selectionSurface } from "./selection-actions";
@@ -519,7 +520,7 @@ export function SyntaxHighlightBlock({
 
   const styles = useMemo(
     () =>
-      StyleSheet.create({
+      createStyles(tokens.fontScale, {
         container: {
           ...selectableSurface,
           backgroundColor: tokens.surfaceCodeGlass,

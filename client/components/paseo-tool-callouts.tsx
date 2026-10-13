@@ -7,6 +7,7 @@ import { glowing } from "./glow";
 import { Rotate } from "./motion";
 import { radius } from "./theme-tokens";
 import type { ExtendedThemeTokens } from "./theme-tokens";
+import { createStyles } from "./type-scale";
 import { ProviderLogo } from "./provider-logo";
 import { SyntaxHighlightBlock } from "./syntax-highlight";
 import { selectableSurface } from "./selection";
@@ -31,7 +32,7 @@ export function PaseoToolCallout({ data, tokens, defaultExpanded = true }: Paseo
 
   const styles = useMemo(
     () =>
-      StyleSheet.create({
+      createStyles(tokens.fontScale, {
         container: {
           marginVertical: 8,
           borderRadius: radius.card,

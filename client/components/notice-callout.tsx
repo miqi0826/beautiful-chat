@@ -6,6 +6,7 @@ import { surfaceProps } from "./view-props";
 import { glowing } from "./glow";
 import { radius } from "./theme-tokens";
 import type { ExtendedThemeTokens } from "./theme-tokens";
+import { createStyles } from "./type-scale";
 import { renderTerminalOutput } from "./syntax-highlight";
 import { selectableSurface, unselectable } from "./selection";
 import { selectionCodeText, selectionSurface } from "./selection-actions";
@@ -83,7 +84,7 @@ export function NoticeCallout({ data, tokens }: NoticeCalloutProps): React.React
 
   const styles = useMemo(
     () =>
-      StyleSheet.create({
+      createStyles(tokens.fontScale, {
         container: {
           marginVertical: 4,
           borderRadius: radius.card,

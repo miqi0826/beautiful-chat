@@ -7,6 +7,7 @@ import { glowing } from "./glow";
 import { Rotate } from "./motion";
 import { radius } from "./theme-tokens";
 import type { ExtendedThemeTokens } from "./theme-tokens";
+import { createStyles } from "./type-scale";
 import { SyntaxHighlightBlock } from "./syntax-highlight";
 import { selectableSurface, unselectable } from "./selection";
 import { selectionSurface } from "./selection-actions";
@@ -54,7 +55,7 @@ export function SystemCard({ envelope, tokens }: SystemCardProps): React.ReactEl
 
   const styles = useMemo(
     () =>
-      StyleSheet.create({
+      createStyles(tokens.fontScale, {
         container: {
           borderRadius: radius.card,
           borderWidth: 1,

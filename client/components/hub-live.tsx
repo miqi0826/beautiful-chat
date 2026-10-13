@@ -2,6 +2,7 @@ import React, { useEffect, useMemo } from "react";
 import { View, StyleSheet } from "react-native";
 import { HubCallout } from "./hub-callout";
 import type { ExtendedThemeTokens } from "./theme-tokens";
+import { createStyles } from "./type-scale";
 import { retireHubActivity, useHubActivity } from "../hub-activity";
 import { noteTimelineItem, useIsTimelineTail } from "../timeline-tail";
 import type { HubData } from "../../shared/contracts";
@@ -45,7 +46,7 @@ export function TimelineTailHub({ agentId, tokens, itemKey, at, kind }: Timeline
 
   const styles = useMemo(
     () =>
-      StyleSheet.create({
+      createStyles(tokens.fontScale, {
         container: { marginTop: 6 },
       }),
     [],

@@ -10,6 +10,7 @@ import { Breathe } from "./breathe";
 import { PulseDot } from "./pulse-dot";
 import { radius } from "./theme-tokens";
 import type { ExtendedThemeTokens } from "./theme-tokens";
+import { createStyles } from "./type-scale";
 import { HubCallout } from "./hub-callout";
 import { PaseoToolCallout } from "./paseo-tool-callouts";
 import { SyntaxHighlightBlock, renderTerminalOutput } from "./syntax-highlight";
@@ -117,7 +118,7 @@ export function ToolCallout({
 
   const styles = useMemo(
     () =>
-      StyleSheet.create({
+      createStyles(tokens.fontScale, {
         container: {
           marginVertical: 4,
           borderRadius: radius.card,
@@ -999,7 +1000,7 @@ interface SubagentStyles {
 function useSubagentStyles(tokens: ExtendedThemeTokens): SubagentStyles {
   return useMemo(
     () =>
-      StyleSheet.create({
+      createStyles(tokens.fontScale, {
         batch: {
           padding: 10,
           borderRadius: radius.block,

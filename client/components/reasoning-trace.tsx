@@ -11,6 +11,7 @@ import { radius } from "./theme-tokens";
 import { selectableSurface } from "./selection";
 import { selectionSurface } from "./selection-actions";
 import type { ExtendedThemeTokens } from "./theme-tokens";
+import { createStyles } from "./type-scale";
 import type { ReasoningTraceData, ReasoningStep } from "../../shared/contracts";
 import { SyntaxHighlightBlock } from "./syntax-highlight";
 
@@ -68,7 +69,7 @@ export function ReasoningTrace({ data, tokens, defaultExpanded = false }: Reason
 
   const styles = useMemo(
     () =>
-      StyleSheet.create({
+      createStyles(tokens.fontScale, {
         wrapper: {
           marginVertical: 8,
           borderRadius: radius.card,

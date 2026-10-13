@@ -13,10 +13,30 @@ export type UiFontPreference = "inter" | "system";
 export type CodeFontPreference = "code" | "plain";
 export type MarkdownVariantPreference = "document" | "compact" | "terminal";
 
+/**
+ * Type scale multipliers.
+ *
+ * The plugin's stylesheets are authored at 1, and the daemon cannot know how
+ * far a reader sits from the screen, so the reader picks. The steps are wide
+ * enough to be worth choosing and the top one is deliberately generous: this is
+ * the only way to make the stream readable on a large display, and a control
+ * that stops short of that has not solved the problem it exists for.
+ */
+export const FONT_SCALES = {
+  compact: 0.9,
+  default: 1,
+  large: 1.2,
+  larger: 1.45,
+} as const;
+
+export type FontScalePreference = keyof typeof FONT_SCALES;
+
 export interface EnhancerPreferences {
   accent: AccentPreset;
   uiFont: UiFontPreference;
   codeFont: CodeFontPreference;
+  /** Multiplier applied to every type size and to the spacing that carries it. */
+  fontScale: FontScalePreference;
   frostedGlass: boolean;
   /**
    * A light that follows the pointer across a card. Web and desktop only:
@@ -53,6 +73,7 @@ export const DEFAULT_PREFERENCES: Readonly<EnhancerPreferences> = {
   accent: "host",
   uiFont: "inter",
   codeFont: "code",
+  fontScale: "default",
   frostedGlass: true,
   pointerGlow: true,
   enhancedUserBubble: true,
@@ -72,6 +93,10 @@ function isAccentPreset(value: unknown): value is AccentPreset {
   return typeof value === "string" && value in ACCENT_PRESETS;
 }
 
+function isFontScale(value: unknown): value is FontScalePreference {
+  return typeof value === "string" && value in FONT_SCALES;
+}
+
 function loadPreferences(): EnhancerPreferences {
   try {
     const stored = storage()?.getItem(STORAGE_KEY);
@@ -81,6 +106,9 @@ function loadPreferences(): EnhancerPreferences {
       accent: isAccentPreset(candidate.accent) ? candidate.accent : DEFAULT_PREFERENCES.accent,
       uiFont: candidate.uiFont === "system" ? "system" : DEFAULT_PREFERENCES.uiFont,
       codeFont: candidate.codeFont === "plain" ? "plain" : DEFAULT_PREFERENCES.codeFont,
+      fontScale: isFontScale(candidate.fontScale)
+        ? candidate.fontScale
+        : DEFAULT_PREFERENCES.fontScale,
       frostedGlass:
         typeof candidate.frostedGlass === "boolean"
           ? candidate.frostedGlass

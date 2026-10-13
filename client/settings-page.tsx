@@ -3,6 +3,7 @@ import { Animated, Platform, Pressable, StyleSheet, Text, View } from "react-nat
 import type { PluginSurfaceProps } from "@getpaseo/plugin/client";
 import { hostFontEscape } from "./components/host-font-escape";
 import { radius, buildThemeTokens, type ExtendedThemeTokens } from "./components/theme-tokens";
+import { createScaleCache, round, scaleSize } from "./components/type-scale";
 import {
   ACCENT_PRESETS,
   resetEnhancerPreferences,
@@ -10,6 +11,7 @@ import {
   useEnhancerPreferences,
   type AccentPreset,
   type CodeFontPreference,
+  type FontScalePreference,
   type UiFontPreference,
 } from "./preferences";
 
@@ -28,6 +30,8 @@ const ACCENT_OPTIONS: ReadonlyArray<{
 const TRACK_WIDTH = 38;
 const TRACK_HEIGHT = 22;
 const KNOB = 16;
+const TRACK_PADDING = 2;
+const TRACK_BORDER = 1;
 
 /**
  * An on/off control that reads as one. A pair of buttons states the value
@@ -45,6 +49,17 @@ function Toggle({
   label: string;
   tokens: ExtendedThemeTokens;
 }) {
+  const styles = settingsStyles(tokens.fontScale);
+  // The knob travels the content box: the track less its border and padding on
+  // both sides, less the knob itself. The border is a hairline and does not
+  // scale, the padding does — reading both the way the stylesheet does is what
+  // keeps the knob landing flush at every step.
+  const travel = round(
+    scaleSize(TRACK_WIDTH, tokens.fontScale) -
+      2 * TRACK_BORDER -
+      2 * scaleSize(TRACK_PADDING, tokens.fontScale) -
+      scaleSize(KNOB, tokens.fontScale),
+  );
   const position = useRef(new Animated.Value(value ? 1 : 0)).current;
 
   useEffect(() => {
@@ -83,7 +98,7 @@ function Toggle({
               {
                 translateX: position.interpolate({
                   inputRange: [0, 1],
-                  outputRange: [0, TRACK_WIDTH - KNOB - 6],
+                  outputRange: [0, travel],
                 }),
               },
             ],
@@ -108,6 +123,7 @@ function ToggleRow({
   onChange(next: boolean): void;
   tokens: ExtendedThemeTokens;
 }) {
+  const styles = settingsStyles(tokens.fontScale);
   return (
     <View style={[styles.row, styles.toggleRow, { borderTopColor: tokens.borderSubtle }]}>
       <View style={styles.toggleText}>
@@ -139,6 +155,7 @@ function OptionButton({
   onPress(): void;
   tokens: ExtendedThemeTokens;
 }) {
+  const styles = settingsStyles(tokens.fontScale);
   return (
     <Pressable
       accessibilityRole="button"
@@ -179,6 +196,7 @@ function ChoiceRow<T extends string>({
   onChange(value: T): void;
   tokens: ExtendedThemeTokens;
 }) {
+  const styles = settingsStyles(tokens.fontScale);
   return (
     <View style={[styles.row, { borderTopColor: tokens.borderSubtle }]}>
       <Text style={[styles.rowTitle, { color: tokens.foreground, fontFamily: tokens.fontUi }]}>
@@ -214,6 +232,7 @@ export function BeautifulChatSettingsPage({ theme }: PluginSurfaceProps) {
     () => buildThemeTokens(theme.colors, preferences),
     [preferences, theme.colors],
   );
+  const styles = settingsStyles(tokens.fontScale);
 
   return (
     <View {...hostFontEscape} style={[styles.container, { backgroundColor: tokens.surface0 }]}>
@@ -288,6 +307,20 @@ export function BeautifulChatSettingsPage({ theme }: PluginSurfaceProps) {
             })}
           </View>
         </View>
+
+        <ChoiceRow<FontScalePreference>
+          title="Type size"
+          description="Scales every size in the enhanced stream, and the spacing that carries it. Turn it up when the display is far away or the text is hard to read."
+          value={preferences.fontScale}
+          options={[
+            { value: "compact", label: "Compact" },
+            { value: "default", label: "Default" },
+            { value: "large", label: "Large" },
+            { value: "larger", label: "Larger" },
+          ]}
+          onChange={(fontScale) => updateEnhancerPreferences({ fontScale })}
+          tokens={tokens}
+        />
 
         <ChoiceRow<UiFontPreference>
           title="Interface font"
@@ -382,53 +415,55 @@ export function BeautifulChatSettingsPage({ theme }: PluginSurfaceProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  // No `flex: 1` here. The host mounts a settings screen inside a plain
-  // column `View` (app `plugins/settings/index.tsx:107`), and React Native Web
-  // compiles `flex: 1` to `flex: 1 1 0%` — a zero basis in a container that
-  // sizes to its content, so the whole page collapses to nothing.
-  container: { alignSelf: "stretch", padding: 16, gap: 12 },
-  toggleRow: { flexDirection: "row", alignItems: "center", gap: 16 },
-  // The text column takes the slack so a long description wraps instead of
-  // pushing the switch off the card.
-  toggleText: { flex: 1, minWidth: 0, gap: 8 },
-  track: {
-    width: TRACK_WIDTH,
-    height: TRACK_HEIGHT,
-    borderRadius: TRACK_HEIGHT / 2,
-    borderWidth: 1,
-    padding: 2,
-    justifyContent: "center",
-  },
-  knob: { width: KNOB, height: KNOB, borderRadius: KNOB / 2 },
-  intro: { padding: 14, borderWidth: 1, borderRadius: radius.card, gap: 4 },
-  title: { fontSize: 16, fontWeight: "700" },
-  description: { fontSize: 13, lineHeight: 18 },
-  card: { borderWidth: 1, borderRadius: radius.card, overflow: "hidden" },
-  row: { padding: 14, gap: 8, borderTopWidth: 1 },
-  rowTitle: { fontSize: 14, fontWeight: "600" },
-  rowDescription: { fontSize: 12, lineHeight: 17 },
-  options: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  option: { borderWidth: 1, borderRadius: radius.block, paddingHorizontal: 10, paddingVertical: 7 },
-  optionLabel: { fontSize: 12, fontWeight: "600" },
-  accentOptions: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  accentOption: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    borderWidth: 1,
-    borderRadius: radius.block,
-    paddingHorizontal: 9,
-    paddingVertical: 7,
-  },
-  swatch: { width: 12, height: 12, borderRadius: radius.chip },
-  accentLabel: { fontSize: 12, fontWeight: "600" },
-  reset: {
-    alignSelf: "flex-start",
-    borderWidth: 1,
-    borderRadius: radius.block,
-    paddingHorizontal: 11,
-    paddingVertical: 8,
-  },
-  resetText: { fontSize: 12, fontWeight: "600" },
-});
+const settingsStyles = createScaleCache(() =>
+  StyleSheet.create({
+    // No `flex: 1` here. The host mounts a settings screen inside a plain
+    // column `View` (app `plugins/settings/index.tsx:107`), and React Native Web
+    // compiles `flex: 1` to `flex: 1 1 0%` — a zero basis in a container that
+    // sizes to its content, so the whole page collapses to nothing.
+    container: { alignSelf: "stretch", padding: 16, gap: 12 },
+    toggleRow: { flexDirection: "row", alignItems: "center", gap: 16 },
+    // The text column takes the slack so a long description wraps instead of
+    // pushing the switch off the card.
+    toggleText: { flex: 1, minWidth: 0, gap: 8 },
+    track: {
+      width: TRACK_WIDTH,
+      height: TRACK_HEIGHT,
+      borderRadius: TRACK_HEIGHT / 2,
+      borderWidth: 1,
+      padding: 2,
+      justifyContent: "center",
+    },
+    knob: { width: KNOB, height: KNOB, borderRadius: KNOB / 2 },
+    intro: { padding: 14, borderWidth: 1, borderRadius: radius.card, gap: 4 },
+    title: { fontSize: 16, fontWeight: "700" },
+    description: { fontSize: 13, lineHeight: 18 },
+    card: { borderWidth: 1, borderRadius: radius.card, overflow: "hidden" },
+    row: { padding: 14, gap: 8, borderTopWidth: 1 },
+    rowTitle: { fontSize: 14, fontWeight: "600" },
+    rowDescription: { fontSize: 12, lineHeight: 17 },
+    options: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+    option: { borderWidth: 1, borderRadius: radius.block, paddingHorizontal: 10, paddingVertical: 7 },
+    optionLabel: { fontSize: 12, fontWeight: "600" },
+    accentOptions: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+    accentOption: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      borderWidth: 1,
+      borderRadius: radius.block,
+      paddingHorizontal: 9,
+      paddingVertical: 7,
+    },
+    swatch: { width: 12, height: 12, borderRadius: radius.chip },
+    accentLabel: { fontSize: 12, fontWeight: "600" },
+    reset: {
+      alignSelf: "flex-start",
+      borderWidth: 1,
+      borderRadius: radius.block,
+      paddingHorizontal: 11,
+      paddingVertical: 8,
+    },
+    resetText: { fontSize: 12, fontWeight: "600" },
+    }),
+);

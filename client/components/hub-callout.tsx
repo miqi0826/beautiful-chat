@@ -4,6 +4,7 @@ import type { ImageStyle, TextStyle, ViewStyle } from "react-native";
 import { Glyph } from "./glyph";
 import { radius, withAlpha } from "./theme-tokens";
 import type { ExtendedThemeTokens } from "./theme-tokens";
+import { createStyles } from "./type-scale";
 import { selectableSurface, unselectable } from "./selection";
 import { selectionSurface, selectionCodeText } from "./selection-actions";
 import { renderTerminalOutput } from "./syntax-highlight";
@@ -1128,7 +1129,7 @@ interface HubStyles {
 function useHubStyles(tokens: ExtendedThemeTokens): HubStyles {
   return useMemo(
     () =>
-      StyleSheet.create({
+      createStyles(tokens.fontScale, {
         container: {
           borderRadius: radius.card,
           backgroundColor: tokens.surface1,

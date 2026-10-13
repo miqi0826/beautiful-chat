@@ -5,6 +5,7 @@ import { Glyph } from "./glyph";
 import { unselectable } from "./selection";
 import { radius } from "./theme-tokens";
 import type { ExtendedThemeTokens } from "./theme-tokens";
+import { createStyles } from "./type-scale";
 
 /**
  * The host's own reply footer — copy, fork and the turn's time — is drawn by
@@ -69,7 +70,7 @@ export function AssistantFooter({ text, at, tokens }: AssistantFooterProps) {
 
   const styles = useMemo(
     () =>
-      StyleSheet.create({
+      createStyles(tokens.fontScale, {
         container: {
           flexDirection: "row",
           alignItems: "center",

@@ -5,6 +5,7 @@ import { Glyph } from "./glyph";
 import { Pop } from "./motion";
 import { radius } from "./theme-tokens";
 import type { ExtendedThemeTokens } from "./theme-tokens";
+import { createStyles } from "./type-scale";
 import { selectableSurface } from "./selection";
 import { selectionSurface } from "./selection-actions";
 
@@ -101,7 +102,7 @@ export function UserMessage({
 
   const styles = useMemo(
     () =>
-      StyleSheet.create({
+      createStyles(tokens.fontScale, {
         container: {
           alignSelf: "flex-end",
           maxWidth: "82%",

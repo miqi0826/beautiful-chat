@@ -4,6 +4,7 @@ import { Icon as HostIcon } from "@getpaseo/plugin/client/react-native";
 import { fontMono } from "./theme-tokens";
 import { MARK_BITMAPS, MONO_MARKS } from "./mark-bitmaps";
 import { unselectable } from "./selection";
+import { createScaleCache, scaleSize, useTypeScale } from "./type-scale";
 
 export interface IconProps {
   name: string;
@@ -57,12 +58,17 @@ function BrandMark({ id, size, color }: { id: string; size: number; color: strin
  */
 export function Icon({ name, size = 13, color = "#94a3b8" }: IconProps): ReactElement {
   const safeColor = color === "currentColor" ? "#94a3b8" : color;
-  const glyph = renderGlyph(name, size, safeColor);
+  // A mark sits beside text and has to keep pace with it. Scaling here covers
+  // every call site, which pass a size and no scale of their own.
+  const scale = useTypeScale();
+  const drawn = scaleSize(size, scale);
+  const styles = glyphStyles(scale);
+  const glyph = renderGlyph(name, drawn, safeColor, styles);
   return (
     <View
       style={{
-        width: size,
-        height: size,
+        width: drawn,
+        height: drawn,
         alignItems: "center",
         justifyContent: "center",
       }}
@@ -74,7 +80,14 @@ export function Icon({ name, size = 13, color = "#94a3b8" }: IconProps): ReactEl
 
 export { Icon as Glyph };
 
-function renderGlyph(name: string, size: number, color: string): ReactElement {
+type GlyphStyles = ReturnType<typeof glyphStyles>;
+
+function renderGlyph(
+  name: string,
+  size: number,
+  color: string,
+  styles: GlyphStyles,
+): ReactElement {
   const stroke = Math.max(1.2, size / 8.5);
 
   switch (name) {
@@ -427,24 +440,30 @@ function renderGlyph(name: string, size: number, color: string): ReactElement {
   }
 }
 
-const styles = StyleSheet.create({
-  arrow: {
-    textAlign: "center",
-    lineHeight: 14,
-  },
-  symbol: {
-    textAlign: "center",
-    lineHeight: 14,
-  },
-  mono: {
-    fontFamily: fontMono,
-    fontWeight: "600",
-    textAlign: "center",
-    lineHeight: 13,
-  },
-  bold: {
-    fontWeight: "800",
-    textAlign: "center",
-    lineHeight: 13,
-  },
-});
+/**
+ * A glyph's line box has to track the type it labels, so the sheet is rebuilt
+ * per scale. The steps are a closed set, so one build each is kept.
+ */
+const glyphStyles = createScaleCache(() =>
+  StyleSheet.create({
+    arrow: {
+      textAlign: "center",
+      lineHeight: 14,
+    },
+    symbol: {
+      textAlign: "center",
+      lineHeight: 14,
+    },
+    mono: {
+      fontFamily: fontMono,
+      fontWeight: "600",
+      textAlign: "center",
+      lineHeight: 13,
+    },
+    bold: {
+      fontWeight: "800",
+      textAlign: "center",
+      lineHeight: 13,
+    },
+  }),
+);

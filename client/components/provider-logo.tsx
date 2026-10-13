@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 import { fontUi, radius } from "./theme-tokens";
+import { createScaleCache, scaleSize, useTypeScale } from "./type-scale";
 import { MARK_BITMAPS, MONO_MARKS } from "./mark-bitmaps";
 import { unselectable } from "./selection";
 
@@ -70,6 +71,9 @@ function markId(provider: KnownProvider): string | undefined {
 }
 
 export function ProviderLogo({ provider, size = 14, showLabel = false }: ProviderLogoProps) {
+  const scale = useTypeScale();
+  const styles = logoStyles(scale);
+  const drawn = scaleSize(size, scale);
   const normalized = normalizeProvider(provider);
   const config = PROVIDER_CONFIGS[normalized];
   const id = useMemo(() => markId(normalized), [normalized]);
@@ -83,19 +87,19 @@ export function ProviderLogo({ provider, size = 14, showLabel = false }: Provide
         <Image
           source={{ uri }}
           style={
-            tint ? { width: size, height: size, tintColor: tint } : { width: size, height: size }
+            tint ? { width: drawn, height: drawn, tintColor: tint } : { width: drawn, height: drawn }
           }
           resizeMode="contain"
           accessibilityLabel={config.displayName}
         />
       ) : (
         <View
-          style={[styles.fallback, { width: size, height: size, borderColor: config.brandColor }]}
+          style={[styles.fallback, { width: drawn, height: drawn, borderColor: config.brandColor }]}
         >
           <Text
             style={[
               styles.fallbackLabel,
-              { fontSize: size * 0.6, color: config.brandColor },
+              { fontSize: drawn * 0.6, color: config.brandColor },
               unselectable,
             ]}
           >
@@ -134,14 +138,16 @@ const PROVIDER_CONFIGS: Record<KnownProvider, ProviderMeta> = {
   generic: { displayName: "Agent", brandColor: "#94A3B8" },
 };
 
-const styles = StyleSheet.create({
-  row: { flexDirection: "row", alignItems: "center", gap: 6 },
-  fallback: {
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderRadius: radius.chip,
-  },
-  fallbackLabel: { fontFamily: fontUi, fontWeight: "700" },
-  label: { fontFamily: fontUi, fontSize: 11, fontWeight: "600" },
-});
+const logoStyles = createScaleCache(() =>
+  StyleSheet.create({
+    row: { flexDirection: "row", alignItems: "center", gap: 6 },
+    fallback: {
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 1,
+      borderRadius: radius.chip,
+    },
+    fallbackLabel: { fontFamily: fontUi, fontWeight: "700" },
+    label: { fontFamily: fontUi, fontSize: 11, fontWeight: "600" },
+  }),
+);

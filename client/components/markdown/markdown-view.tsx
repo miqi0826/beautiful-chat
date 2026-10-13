@@ -3,6 +3,7 @@ import { View, Text, ScrollView, StyleSheet } from "react-native";
 import type { TextStyle, ViewStyle } from "react-native";
 import { Glyph } from "../glyph";
 import { radius, withAlpha, type ExtendedThemeTokens } from "../theme-tokens";
+import { createStyles, round } from "../type-scale";
 import { selectableSurface, unselectable } from "../selection";
 import { selectionSurface } from "../selection-actions";
 import { SyntaxHighlightBlock } from "../syntax-highlight";
@@ -198,9 +199,16 @@ interface RenderContext {
 export function MarkdownView({ text, tokens, variant }: MarkdownViewProps) {
   const blocks = useMemo(() => parseMarkdown(text), [text]);
   const styles = useMemo(() => buildStyles(tokens, variant), [tokens, variant]);
+  // Column estimates and the checkbox gutter are measured from type, so they
+  // take the same scale the styles do. Without this a scaled table would keep
+  // its old column widths and wrap every cell.
+  const metrics = useMemo(
+    () => scaleMetrics(VARIANT_METRICS[variant], tokens.fontScale),
+    [variant, tokens.fontScale],
+  );
   const context = useMemo<RenderContext>(
-    () => ({ styles, tokens, metrics: VARIANT_METRICS[variant] }),
-    [styles, tokens, variant],
+    () => ({ styles, tokens, metrics }),
+    [styles, tokens, metrics],
   );
 
   return (
@@ -527,6 +535,36 @@ function columnWidths(block: MdTableBlock, metrics: VariantMetrics): number[] {
   return widths;
 }
 
+/**
+ * Column estimates, the marker gutter and glyph sizes are derived from the body
+ * size rather than declared as styles, so they scale alongside it. The flags
+ * that select a layout stay put: a scaled terminal variant is still terminal.
+ */
+function scaleMetrics(metrics: VariantMetrics, scale: number): VariantMetrics {
+  if (scale === 1) return metrics;
+  const [h1, h2, h3, h4] = metrics.headingSizes;
+  return {
+    ...metrics,
+    bodySize: round(metrics.bodySize * scale),
+    bodyLineHeight: round(metrics.bodyLineHeight * scale),
+    blockGap: round(metrics.blockGap * scale),
+    headingSizes: [
+      round(h1 * scale),
+      round(h2 * scale),
+      round(h3 * scale),
+      round(h4 * scale),
+    ],
+    headingGap: round(metrics.headingGap * scale),
+    markerWidth: round(metrics.markerWidth * scale),
+    itemGap: round(metrics.itemGap * scale),
+    indentStep: round(metrics.indentStep * scale),
+    tableGap: round(metrics.tableGap * scale),
+    columnMin: round(metrics.columnMin * scale),
+    columnMax: round(metrics.columnMax * scale),
+    glyphSize: round(metrics.glyphSize * scale),
+  };
+}
+
 function buildStyles(tokens: ExtendedThemeTokens, variant: MarkdownVariant): MarkdownStyles {
   const metrics = VARIANT_METRICS[variant];
   const bodyFont = metrics.mono ? tokens.fontMono : tokens.fontUi;
@@ -535,7 +573,7 @@ function buildStyles(tokens: ExtendedThemeTokens, variant: MarkdownVariant): Mar
   // accent on h1 and the hash run carry the hierarchy that size cannot.
   const topColor = variant === "terminal" ? tokens.accent : tokens.foreground;
 
-  return StyleSheet.create({
+  return createStyles(tokens.fontScale, {
     root: {
       ...selectableSurface,
       width: "100%",

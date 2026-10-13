@@ -11,6 +11,7 @@ import { radius } from "./theme-tokens";
 import { selectableSurface, unselectable } from "./selection";
 import { selectionSurface } from "./selection-actions";
 import type { ExtendedThemeTokens } from "./theme-tokens";
+import { createStyles } from "./type-scale";
 import type { TaskListData, TaskItemData, TaskStatus } from "../../shared/contracts";
 
 interface TaskListProps {
@@ -83,7 +84,7 @@ export function TaskList({ data, tokens, onToggleTask }: TaskListProps) {
 
   const styles = useMemo(
     () =>
-      StyleSheet.create({
+      createStyles(tokens.fontScale, {
         container: {
           marginVertical: 10,
           borderRadius: radius.card,

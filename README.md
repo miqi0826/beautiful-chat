@@ -149,9 +149,27 @@ Devicon brand marks, and the file-manager link.
 | Accent colour          | Follow the Paseo theme, or pick Jade, Violet, Amber, or Rose.      |
 | Interface font         | Embedded Inter, or the system interface face.                      |
 | Code glyphs            | Iosevka with ligatures, or literal glyphs.                         |
+| Type size              | Compact, Default, Large, or Larger. Scales the stream's type.      |
 | Frosted glass          | Blur card surfaces, or paint them solid.                           |
 | Enhanced prompt bubble | Off hands prompts back to Paseo, whose bubble shows pasted images. |
 | Assistant markdown     | Off hands replies back to Paseo's own markdown renderer.           |
+
+### Type size
+
+The plugin's stylesheets are authored at one size. **Type size** multiplies them: Compact 0.9,
+Default 1, Large 1.2, Larger 1.45.
+
+Type and the space that carries it scale together, so a card keeps its proportions instead of
+growing text inside a box built for the old size. That covers font sizes, line heights, the gaps
+and padding around them, icon glyphs, and the boxes that hold type — an icon bubble, a code
+gutter, the inset that lines a rail up with the text beside it.
+
+Borders stay put, because a hairline is a hairline at any size and a fractional border renders as
+a blur. Dimensions past 64px stay put too: those bound the layout rather than follow the type, so
+a larger setting cannot let a screenshot take over the thread.
+
+Default is byte-identical to the rendering before the setting existed — at scale 1 the transform
+returns its input untouched.
 
 ---
 
@@ -270,6 +288,7 @@ beautiful-chat/
     settings-page.tsx        # Settings screen
     preferences.ts           # Client-side presentation preferences
     components/              # Cards, syntax block, glyphs, motion, theme tokens
+      type-scale.ts          # Applies the reader's type size to every stylesheet
       mark-bitmaps.ts        # GENERATED PNG rasters of every brand mark
       devicon-data.ts        # Vendor SVG sources, read only by the generator
       lobe-marks.ts          # Vendor SVG sources, read only by the generator

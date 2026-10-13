@@ -3,6 +3,7 @@ import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Glyph } from "./glyph";
 import { radius } from "./theme-tokens";
 import type { ExtendedThemeTokens } from "./theme-tokens";
+import { createStyles } from "./type-scale";
 import { SyntaxHighlightBlock, renderTerminalOutput } from "./syntax-highlight";
 import { unselectable } from "./selection";
 import { selectionCodeText } from "./selection-actions";
@@ -30,7 +31,7 @@ export function GitHubBody({ data, tokens, running }: GitHubBodyProps) {
 
   const styles = useMemo(
     () =>
-      StyleSheet.create({
+      createStyles(tokens.fontScale, {
         container: { gap: 8 },
         row: {
           flexDirection: "row",

@@ -1,5 +1,6 @@
 import type { PluginTheme } from "@getpaseo/plugin";
 import { DEFAULT_PREFERENCES, type EnhancerPreferences, ACCENT_PRESETS } from "../preferences";
+import { scaleFor } from "./type-scale";
 
 export type PluginSurfaceColors = PluginTheme["colors"];
 
@@ -33,6 +34,12 @@ export interface ExtendedThemeTokens {
   fontMono: string;
   fontCode: string;
   fontUi: string;
+  /**
+   * The reader's type scale. Every stylesheet the plugin builds is authored at
+   * 1 and passed through this, so the authored numbers stay the source of
+   * truth and the preference only ever multiplies them.
+   */
+  fontScale: number;
 
   // Surfaces
   surface0: string;
@@ -180,6 +187,7 @@ export function buildThemeTokens(
     fontMono,
     fontCode: preferences.codeFont === "plain" ? fontMono : fontCode,
     fontUi: preferences.uiFont === "system" ? "System" : fontUi,
+    fontScale: scaleFor(preferences.fontScale),
 
     surface0: colors.surface0,
     surface1: withAlpha(fg, isDark ? 0.03 : 0.025),

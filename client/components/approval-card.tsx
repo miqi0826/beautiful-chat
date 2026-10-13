@@ -6,6 +6,7 @@ import { surfaceProps } from "./view-props";
 import { glowing } from "./glow";
 import { radius } from "./theme-tokens";
 import type { ExtendedThemeTokens } from "./theme-tokens";
+import { createStyles } from "./type-scale";
 import type { ApprovalRequest } from "../../shared/contracts";
 import { SyntaxHighlightBlock } from "./syntax-highlight";
 import { selectableSurface, unselectable } from "./selection";
@@ -39,7 +40,7 @@ export function ApprovalCard({ request, tokens, onApprove, onDeny }: ApprovalCar
 
   const styles = useMemo(
     () =>
-      StyleSheet.create({
+      createStyles(tokens.fontScale, {
         card: {
           marginVertical: 10,
           borderRadius: radius.card,
