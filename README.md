@@ -153,6 +153,7 @@ Devicon brand marks, and the file-manager link.
 | Frosted glass          | Blur card surfaces, or paint them solid.                           |
 | Enhanced prompt bubble | Off hands prompts back to Paseo, whose bubble shows pasted images. |
 | Assistant markdown     | Off hands replies back to Paseo's own markdown renderer.           |
+| Reasoning              | Stream, Expanded, or Paseo. See [Reasoning](#reasoning) below.     |
 
 ### Type size
 
@@ -170,6 +171,21 @@ a larger setting cannot let a screenshot take over the thread.
 
 Default is byte-identical to the rendering before the setting existed — at scale 1 the transform
 returns its input untouched.
+
+### Reasoning
+
+Intercepting reasoning replaces Paseo's row, and Paseo's own setting for it goes with it: the trace
+is the plugin's component, and the host tells a plugin nothing about what the reader chose. So the
+plugin carries the choice instead.
+
+| Setting  | Behaviour                                                                     |
+| -------- | ----------------------------------------------------------------------------- |
+| Stream   | A trace opens while it is being written and stays open once read.              |
+| Expanded | Every trace is held open, including ones already on screen when you switch.    |
+| Paseo    | The plugin declines the row, so Paseo draws it and your Paseo setting applies. |
+
+**Paseo** is the option to reach for if you want Paseo's own reasoning behaviour — collapsed by
+default, or whatever you have set there. Flipping to it takes effect on the next reasoning block.
 
 ---
 

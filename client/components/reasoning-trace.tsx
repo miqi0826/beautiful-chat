@@ -18,11 +18,32 @@ import { SyntaxHighlightBlock } from "./syntax-highlight";
 interface ReasoningTraceProps {
   data: ReasoningTraceData;
   tokens: ExtendedThemeTokens;
+  /** The state a trace starts in. Read once, so a trace that opened to stream does not snap shut when it finishes. */
   defaultExpanded?: boolean;
+  /**
+   * The reader's standing "keep traces open" setting, which is not the same
+   * thing as `defaultExpanded`: it re-applies when it changes, so flipping it
+   * moves the traces already on screen rather than only the next one.
+   */
+  expandAll?: boolean;
 }
 
-export function ReasoningTrace({ data, tokens, defaultExpanded = false }: ReasoningTraceProps) {
+export function ReasoningTrace({
+  data,
+  tokens,
+  defaultExpanded = false,
+  expandAll = false,
+}: ReasoningTraceProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+  // React's documented "adjust state when a prop changes" pattern: adopt the
+  // new value during render rather than in an effect, so the trace never
+  // paints at the old setting first. Comparing against the last applied value
+  // keeps an unrelated re-render from overwriting a manual toggle.
+  const [appliedExpandAll, setAppliedExpandAll] = useState(expandAll);
+  if (expandAll !== appliedExpandAll) {
+    setAppliedExpandAll(expandAll);
+    setIsExpanded(expandAll || data.status === "thinking");
+  }
   const [activeStepId, setActiveStepId] = useState<string | null>(null);
 
   const durationFormatted = (data.durationMs / 1000).toFixed(1);

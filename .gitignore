@@ -4,3 +4,4 @@ dist/
 .showcase/showcase.js
 .showcase/tools/collect.cjs
 .showcase/scale-check.js
+.showcase/reasoning-check.js

@@ -31,6 +31,17 @@ export const FONT_SCALES = {
 
 export type FontScalePreference = keyof typeof FONT_SCALES;
 
+/**
+ * How the model's reasoning is drawn.
+ *
+ * The plugin intercepts reasoning the same way it intercepts tool calls, which
+ * means the host's own setting for it stops applying: the trace is the plugin's
+ * component, and nothing tells the plugin what the reader chose in Paseo. The
+ * third option is the way out — leaving reasoning to the host hands the row
+ * back, and the reader's Paseo setting governs it again.
+ */
+export type ReasoningDisplayPreference = "stream" | "expanded" | "host";
+
 export interface EnhancerPreferences {
   accent: AccentPreset;
   uiFont: UiFontPreference;
@@ -65,6 +76,8 @@ export interface EnhancerPreferences {
   assistantMarkdown: boolean;
   /** Which look the markdown renderer uses. */
   markdownVariant: MarkdownVariantPreference;
+  /** Whether the plugin draws the model's reasoning, and how. */
+  reasoningDisplay: ReasoningDisplayPreference;
 }
 
 const STORAGE_KEY = "paseo/beautiful-chat/preferences/v1";
@@ -80,6 +93,7 @@ export const DEFAULT_PREFERENCES: Readonly<EnhancerPreferences> = {
   selectionActions: true,
   assistantMarkdown: true,
   markdownVariant: "document",
+  reasoningDisplay: "stream",
 };
 
 const listeners = new Set<() => void>();
@@ -95,6 +109,10 @@ function isAccentPreset(value: unknown): value is AccentPreset {
 
 function isFontScale(value: unknown): value is FontScalePreference {
   return typeof value === "string" && value in FONT_SCALES;
+}
+
+function isReasoningDisplay(value: unknown): value is ReasoningDisplayPreference {
+  return value === "stream" || value === "expanded" || value === "host";
 }
 
 function loadPreferences(): EnhancerPreferences {
@@ -133,6 +151,9 @@ function loadPreferences(): EnhancerPreferences {
         candidate.markdownVariant === "compact" || candidate.markdownVariant === "terminal"
           ? candidate.markdownVariant
           : DEFAULT_PREFERENCES.markdownVariant,
+      reasoningDisplay: isReasoningDisplay(candidate.reasoningDisplay)
+        ? candidate.reasoningDisplay
+        : DEFAULT_PREFERENCES.reasoningDisplay,
     };
   } catch {
     return { ...DEFAULT_PREFERENCES };

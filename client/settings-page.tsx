@@ -12,6 +12,7 @@ import {
   type AccentPreset,
   type CodeFontPreference,
   type FontScalePreference,
+  type ReasoningDisplayPreference,
   type UiFontPreference,
 } from "./preferences";
 
@@ -383,6 +384,19 @@ export function BeautifulChatSettingsPage({ theme }: PluginSurfaceProps) {
           description="Draws the reply with the plugin's own headings, lists and syntax-highlighted code blocks. The plugin cannot reach Paseo's markdown pipeline, so its version is a subset: turn this off for mermaid diagrams, images, and the host's file-path links."
           value={preferences.assistantMarkdown}
           onChange={(assistantMarkdown) => updateEnhancerPreferences({ assistantMarkdown })}
+          tokens={tokens}
+        />
+
+        <ChoiceRow<ReasoningDisplayPreference>
+          title="Reasoning"
+          description="Paseo hands the plugin the model's reasoning to draw, which replaces Paseo's own row and its setting along with it. Stream opens a trace while it is written. Expanded holds every trace open. Paseo leaves reasoning to Paseo, so your setting there governs it again."
+          value={preferences.reasoningDisplay}
+          options={[
+            { value: "stream", label: "Stream" },
+            { value: "expanded", label: "Expanded" },
+            { value: "host", label: "Paseo" },
+          ]}
+          onChange={(reasoningDisplay) => updateEnhancerPreferences({ reasoningDisplay })}
           tokens={tokens}
         />
 

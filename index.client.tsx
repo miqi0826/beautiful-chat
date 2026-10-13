@@ -84,11 +84,18 @@ export default function contribute(client: PluginClientContext) {
     Component: LiveToolCallRenderer,
   });
 
+  // Read inside `transform` rather than at registration: flipping the setting
+  // has to take effect on the next reasoning block without a plugin reload,
+  // which is the same reason the assistant transformer below reads its own.
+  // Returning `undefined` leaves the item to the host, and that is what makes
+  // the "host" option work — the row goes back to Paseo's renderer, where
+  // Paseo's own setting governs it.
   const removeReasoningTransformer = client.addTimelineTransformer({
     id: "omp-enhanced-reasoning",
     query: { itemType: "reasoning" },
     transform({ item, phase }) {
       if (item.type !== "reasoning") return undefined;
+      if (getEnhancerPreferences().reasoningDisplay === "host") return undefined;
       return {
         items: [
           {

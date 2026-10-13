@@ -698,7 +698,11 @@ export function LiveReasoningRenderer({
       <ReasoningTrace
         data={reasoningData}
         tokens={tokens}
+        // A streamed trace opens itself while it is being written. "expanded"
+        // additionally holds every trace open, including ones already on
+        // screen when the setting changes.
         defaultExpanded={data.phase === "streaming"}
+        expandAll={preferences.reasoningDisplay === "expanded"}
       />
     </View>
   );
